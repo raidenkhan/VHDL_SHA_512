@@ -1,0 +1,79 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.sha_512_pkg.ALL;
+
+entity sha_tb is
+end entity sha_tb;
+
+architecture work of sha_tb is
+
+    -- Component declaration for the unit under test (UUT)
+    component optimizedHashFunction
+        port(
+            input_message_block : in std_logic_vector((WORD_SIZE)*16-1 downto 0);
+            clk, run : in std_logic;
+            N : in natural;
+            finished : out std_logic;
+            ms_inpt : in std_logic; 
+            output_hash : out std_logic_vector(8 * WORD_SIZE - 1 downto 0)
+        );
+    end component;
+
+    -- Testbench signals
+    signal clk : std_logic := '0';
+    signal run : std_logic := '0';
+    signal ms_inpt : std_logic := '0';
+    signal finished : std_logic;
+    signal N : natural := 80;
+    signal input_message_block : std_logic_vector((WORD_SIZE)*16-1 downto 0);
+    signal output_hash : std_logic_vector(8 * WORD_SIZE - 1 downto 0);
+
+    -- Clock generation process
+begin
+    clk_process : process
+    begin
+        while true loop
+            clk <= '0';
+            wait for 10 ns;
+            clk <= '1';
+            wait for 10 ns;
+        end loop;
+    end process;
+
+
+    -- Instantiate the Unit Under Test (UUT)
+    uut: optimizedHashFunction
+        port map (
+            input_message_block => input_message_block,
+            clk => clk,
+            run => run,
+            N => N,
+            finished => finished,
+            ms_inpt => ms_inpt,
+            output_hash => output_hash
+        );
+
+    -- Test procedure
+    stim_proc: process
+    begin
+        -- Initialize input message block (example input)
+        input_message_block <= X"6162638000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018";  -- Example 512-bit message block
+        
+        -- Start simulation with 'run' signal high
+        wait for 20 ns;
+        run <= '1';
+        
+        -- Simulate until finished is asserted
+        wait until finished = '1';
+        
+        -- Display output hash after computation finishes
+       -- report "Output Hash: " & to_hex_string(output_hash);
+        
+        -- End simulation
+        wait;
+    end process;
+
+end architecture work;
+
+
